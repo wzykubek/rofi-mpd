@@ -1,0 +1,52 @@
+#!/usr/bin/env sh
+
+artist() {
+	lines(){ mpc list artist | wc -l ; }
+	lines=$(lines)
+	[ "$(lines)" -gt 30 ] && lines=30 
+	mpc list artist | sort -f | rofi -dmenu -i -p "Artists" -l $lines
+}
+
+album() {
+	artist="$1"
+	lines(){ mpc list album artist "$artist" | wc -l ; }
+	lines=$(lines)
+	[ "$(lines)" -gt 30 ] && lines=30
+	mpc list album artist "$artist" | sort -f | rofi -dmenu -i -p "Albums" -l $lines
+}
+
+song() {
+	mpc list title | sort -f | rofi -dmenu -i -p "Song" -l 30 
+}
+
+case "$1" in
+	-l) mode=Library ;;
+	-s) mode=Song ;;
+	-a)
+		MODE=$(printf "Library\nSong" | rofi -dmenu -i -p "Choose mode" -l 2)
+		mode=$MODE ;;
+esac
+
+case "$mode" in
+	Library)
+		artist=$(artist)
+		[ ! "$artist" ] && exit
+		album=$(album "$artist")
+		[ ! "$album" ] && exit
+		mpc clear
+		mpc find artist "$artist" album "$album" | sort | mpc add
+		mpc play >/dev/null
+		;;
+	Song) 
+		song=$(song)		
+		[ ! "$song" ] && exit
+		mpc clear
+		mpc search title "$song" | mpc add
+		mpc play >/dev/null
+		;;
+esac
+
+
+
+
+
