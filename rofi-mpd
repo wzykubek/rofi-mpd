@@ -47,7 +47,7 @@ case "$mode" in
 		album=$(album "$artist")
 		[ ! "$album" ] && exit
 		mpc clear
-		mpc find artist "$artist" album "$album" | sort | mpc add
+		mpc find artist "$artist" album "$album" | mpc add
 		mpc play >/dev/null
 		;;
 	Song) 
@@ -58,3 +58,4 @@ case "$mode" in
 		mpc play >/dev/null
 		;;
 esac
+
