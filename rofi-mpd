@@ -1,7 +1,6 @@
 #!/usr/bin/env sh
 
 m() { rofi -dmenu -i "$@" ;}
-
 mb() { rofi -dmenu -i -kb-custom-1 "Alt+q" "$@" ;}
 
 artist() {
@@ -73,7 +72,7 @@ case "$mode" in
     cod=$?
     [ ! "$song" ] && exit
     [ "$cod" -eq 10 ] || mpc clear
-		mpc search title "$song" | mpc add
+    mpc search "(title==\"$song\")" | mpc add
 		mpc play >/dev/null
 		;;
 	Album)
