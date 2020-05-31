@@ -4,83 +4,86 @@ m() { rofi -dmenu -i "$@" ;}
 mb() { rofi -dmenu -i -kb-custom-1 "Alt+q" "$@" ;}
 
 artist() {
-	lines(){ mpc list artist | wc -l ; }
-	lines=$(lines)
-	[ "$(lines)" -gt 30 ] && lines=30
-	mpc list artist | sort -f | m -p "Artists" -l $lines
+  lines(){ mpc list artist | wc -l ; }
+  lines=$(lines)
+  [ "$(lines)" -gt 30 ] && lines=30
+  mpc list artist | sort -f | m -p "Artists" -l $lines
 }
 
 a_album() {
-	artist="$1"
-	lines(){ mpc list album artist "$artist" | wc -l ; }
-	lines=$(lines)
-	[ "$(lines)" -gt 30 ] && lines=30
-	mpc list album artist "$artist" | sort -f | mb -p "Albums" -l $lines
+  artist="$1"
+  lines(){ mpc list album artist "$artist" | wc -l ; }
+  lines=$(lines)
+  [ "$(lines)" -gt 30 ] && lines=30
+  mpc list album artist "$artist" | sort -f | mb -p "Albums" -l $lines
 }
 
 album() {
-	lines(){ mpc list album | wc -l ; }
-	lines=$(lines)
-	[ "$(lines)" -gt 30 ] && lines=30
-	mpc list album | sort -f | mb -p "Album" -l $lines
+  lines(){ mpc list album | wc -l ; }
+  lines=$(lines)
+  [ "$(lines)" -gt 30 ] && lines=30
+  mpc list album | sort -f | mb -p "Album" -l $lines
 }
 
 song() {
-	lines(){ mpc list title | wc -l ; }
-	lines=$(lines)
-	[ "$(lines)" -gt 30 ] && lines=30
-	mpc list title | sort -f | mb -p "Song" -l 30
+  lines(){ mpc list title | wc -l ; }
+  lines=$(lines)
+  [ "$(lines)" -gt 30 ] && lines=30
+  mpc list title | sort -f | mb -p "Song" -l 30
 }
 
 case "$1" in
-	-l | --library) mode=Library ;;
-	-A | --album) mode=Album ;;
-	-s | --song) mode=Song ;;
-	-a | --ask)
-		MODE=$(printf "Library\nAlbum\nSong" | m -p "Choose mode" -l 3)
-		mode=$MODE
-		;;
-	-h | --help)
-		echo "
-	usage: rofi-mpd [-h] [-l] [-s] [-a]
+  -l | --library) mode=Library ;;
+  -A | --album) mode=Album ;;
+  -s | --song) mode=Song ;;
+  -a | --ask)
+    MODE=$(printf "Library\nAlbum\nSong" | m -p "Choose mode" -l 3)
+    mode=$MODE
+    ;;
+  -h | --help)
+    echo "
+  usage: rofi-mpd [-h] [-l] [-s] [-a]
 
-	arguments:
-	-h, --help 		 show this message and exit
-	-l, --library	 library mode (artist -> album)
-	-A, --album      album mode
-	-s, --song       song mode (select one song)
+  arguments:
+  -h, --help        show this message and exit
+  -l, --library     library mode (artist -> album)
+  -A, --album       album mode
+  -s, --song        song mode (select one song)
+  -a, --ask         ask for mode
 
-	-a, --ask		 ask for mode
-		"
-		exit
-		;;
+  bindings:
+  enter             play song/album now
+  Alt+q             add song/album to queue
+    "
+    exit
+    ;;
 esac
 
 case "$mode" in
-	Library)
-		artist=$(artist)
-		[ ! "$artist" ] && exit
-		album=$(a_album "$artist")
+  Library)
+    artist=$(artist)
+    [ ! "$artist" ] && exit
+    album=$(a_album "$artist")
     cod=$?
     [ ! "$album" ] && exit
     [ "$cod" -eq 10 ] || mpc clear
-		mpc find artist "$artist" album "$album" | mpc add
-		mpc play >/dev/null
-		;;
-	Song)
-		song=$(song)
+    mpc find artist "$artist" album "$album" | mpc add
+    mpc play >/dev/null
+    ;;
+  Song)
+    song=$(song)
     cod=$?
     [ ! "$song" ] && exit
     [ "$cod" -eq 10 ] || mpc clear
     mpc search "(title==\"$song\")" | mpc add
-		mpc play >/dev/null
-		;;
-	Album)
-		album=$(album)
+    mpc play >/dev/null
+    ;;
+  Album)
+    album=$(album)
     cod=$?
     [ ! "$album" ] && exit
     [ "$cod" -eq 10 ] || mpc clear
-		mpc find album "$album" | mpc add
-		mpc play >/dev/null
-		;;
+    mpc find album "$album" | mpc add
+    mpc play >/dev/null
+    ;;
 esac
